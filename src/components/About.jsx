@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import profileImage from '../assets/WhatsApp Image 2025-06-15 at 21.47.18_c3701035.jpg';
 
 const About = () => {
   const containerVariants = {
@@ -48,9 +49,8 @@ const About = () => {
                 className="relative bg-white dark:bg-black border border-black dark:border-white overflow-hidden"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
-              >
-                <img 
-                  src="src\assets\WhatsApp Image 2025-06-15 at 21.47.18_c3701035.jpg" 
+              >                <img 
+                  src={profileImage} 
                   alt="Me" 
                   className="w-full filter grayscale hover:grayscale-0 transition-all duration-300 rounded-lg shadow-lg"
                 />
