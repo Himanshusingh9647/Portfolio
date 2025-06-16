@@ -49,7 +49,8 @@ const About = () => {
                 className="relative bg-white dark:bg-black border border-black dark:border-white overflow-hidden"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.3 }}
-              >                <img 
+              >
+                <img 
                   src={profileImage} 
                   alt="Me" 
                   className="w-full filter grayscale hover:grayscale-0 transition-all duration-300 rounded-lg shadow-lg"
