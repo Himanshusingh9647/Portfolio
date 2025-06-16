@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "npm ci && npm run build",
+  "buildCommand": "npm ci && npx vite build",
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "devCommand": "npm run dev",
   "framework": "vite",
+  "functions": {},
   "rewrites": [
     { "source": "/assets/:path*", "destination": "/assets/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
