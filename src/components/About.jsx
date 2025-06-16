@@ -50,7 +50,7 @@ const About = () => {
                 transition={{ duration: 0.3 }}
               >
                 <img 
-                  src="src\assets\WhatsApp Image 2025-06-15 at 21.47.18_c3701035.jpg" 
+                  src="Portfolio/src/assets/WhatsApp Image 2025-06-15 at 21.47.18_c3701035.jpg" 
                   alt="Me" 
                   className="w-full filter grayscale hover:grayscale-0 transition-all duration-300 rounded-lg shadow-lg"
                 />
