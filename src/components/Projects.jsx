@@ -20,11 +20,11 @@ const Projects = () => {
     },    {
       id: 2,
       title: 'CardiaLink',
-      description: 'A comprehensive healthcare platform connecting patients with cardiologists, featuring appointment scheduling, health monitoring, and telemedicine capabilities.',
+      description: 'A comprehensive healthcare platform helping patients to get a comprehensive insurance profiling using ML techniques.',
       image: CardiaLinkImage,
       video: CardiaLinkVideo,
       category: 'app',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Socket.io'],
+      technologies: ['React', 'Node.js', 'MongoDB', 'Flask'],
       demoLink: 'video', // Special flag to indicate this should show video
       codeLink: 'https://github.com/Himanshusingh9647/CardiaLink'
     }
@@ -202,7 +202,7 @@ const Projects = () => {
             whileTap={{ scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 17 }}
           >
-            View All Projects
+            Check out my GitHub
           </motion.a>
         </motion.div>
       </div>
