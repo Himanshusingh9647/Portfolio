@@ -50,24 +50,22 @@ Reply directly to this email to respond to {{from_name}}.
 2. Find your **Public Key** (something like `xxxxxxxxxxxxxxx`)
 
 ### 5. Update Configuration
-1. Open `src/config/emailjs.js`
-2. Replace the placeholder values:
+1. Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
 
-```javascript
-export const emailjsConfig = {
-  // Replace with your actual Service ID
-  serviceID: 'service_your_actual_id',
-  
-  // Replace with your actual Template ID
-  templateID: 'template_your_actual_id',
-  
-  // Replace with your actual Public Key
-  publicKey: 'your_actual_public_key',
-  
-  // This is already set to your email
-  toEmail: 'himanshusingh1088@gmail.com'
-};
+2. Open `.env` and replace the placeholder values with your actual EmailJS credentials:
+
+```bash
+# EmailJS Configuration
+VITE_EMAILJS_SERVICE_ID=service_your_actual_id
+VITE_EMAILJS_TEMPLATE_ID=template_your_actual_id
+VITE_EMAILJS_PUBLIC_KEY=your_actual_public_key
+VITE_EMAILJS_TO_EMAIL=himanshusingh1088@gmail.com
 ```
+
+3. Save the file - your credentials are now secure and won't be committed to version control
 
 ## 📧 Email Template Variables
 
@@ -89,9 +87,11 @@ The following variables are available in your email template:
 
 ## 🔒 Security
 
-- Your EmailJS public key is safe to use in frontend code
+- Your EmailJS credentials are stored in environment variables (.env file)
+- The .env file is excluded from version control for security
+- EmailJS public key is safe to use in frontend code (despite the name)
 - EmailJS handles all email authentication securely
-- No sensitive credentials are exposed in your code
+- No sensitive credentials are exposed in your code or repository
 
 ## 📝 Notes
 

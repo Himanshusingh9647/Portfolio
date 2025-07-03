@@ -76,6 +76,13 @@ const Contact = () => {
     setIsSubmitting(true);
     setSubmitError('');
 
+    // Check if EmailJS is configured
+    if (!emailjsConfig.isConfigured()) {
+      setIsSubmitting(false);
+      setSubmitError('Email service is not configured yet. Please contact me directly at himanshusingh1088@gmail.com');
+      return;
+    }
+
     try {
       // Create email template parameters
       const templateParams = createEmailTemplate(formData);
@@ -357,6 +364,29 @@ const Contact = () => {
                   <div> * @returns {'{'}Promise{'}'} - A new collaboration opportunity</div>
                   <div> */</div>
                 </motion.div>
+
+                {/* Configuration Notice */}
+                {!emailjsConfig.isConfigured() && (
+                  <motion.div
+                    className="mb-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.3 }}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <div className="text-yellow-600 dark:text-yellow-400 mt-0.5">⚠️</div>
+                      <div className="text-sm">
+                        <div className="font-mono text-yellow-800 dark:text-yellow-200 font-medium mb-1">
+                          // Email service configuration needed
+                        </div>
+                        <div className="text-yellow-700 dark:text-yellow-300">
+                          The contact form will show a fallback message until EmailJS is configured. 
+                          Check <code className="bg-yellow-100 dark:bg-yellow-800 px-1 rounded">EMAILJS_SETUP.md</code> for instructions.
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <motion.div
