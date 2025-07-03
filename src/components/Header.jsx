@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = ({ darkMode, toggleDarkMode }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const mobileMenuRef = useRef(null);
 
   // Handle scroll effect
   useEffect(() => {
@@ -21,9 +22,46 @@ const Header = ({ darkMode, toggleDarkMode }) => {
     };
   }, []);
 
+  // Handle click outside to close mobile menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
+
   // Toggle menu
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  // Handle smooth scrolling and close menu
+  const handleNavClick = (targetId) => {
+    setIsMenuOpen(false);
+    
+    // Small delay to allow menu to start closing
+    setTimeout(() => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        const headerOffset = 80; // Account for fixed header
+        const elementPosition = element.offsetTop;
+        const offsetPosition = elementPosition - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   };  return (
     <motion.header 
       className={`fixed w-full z-30 transition-all duration-300 ${
@@ -54,17 +92,17 @@ const Header = ({ darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.6, delay: 0.2 }}
         >
           {['Home', 'About', 'Projects', 'Skills', 'Contact'].map((item, index) => (
-            <motion.a 
+            <motion.button 
               key={item}
-              href={`#${item.toLowerCase()}`} 
-              className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors duration-200 font-medium"
+              onClick={() => handleNavClick(item.toLowerCase())}
+              className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors duration-200 font-medium bg-transparent border-none cursor-pointer"
               whileHover={{ y: -2 }}
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.4, delay: 0.1 * index }}
             >
               {item}
-            </motion.a>
+            </motion.button>
           ))}
         </motion.nav>        <motion.div 
           className="flex items-center space-x-4"
@@ -118,6 +156,7 @@ const Header = ({ darkMode, toggleDarkMode }) => {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
+            ref={mobileMenuRef}
             className="md:hidden bg-white dark:bg-black border-t border-gray-200 dark:border-gray-800"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
@@ -133,18 +172,17 @@ const Header = ({ darkMode, toggleDarkMode }) => {
                 transition={{ duration: 0.2, delay: 0.1 }}
               >
                 {['Home', 'About', 'Projects', 'Skills', 'Contact'].map((item, index) => (
-                  <motion.a 
+                  <motion.button 
                     key={item}
-                    href={`#${item.toLowerCase()}`} 
-                    className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors duration-200 font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={() => handleNavClick(item.toLowerCase())}
+                    className="text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white transition-colors duration-200 font-medium bg-transparent border-none cursor-pointer text-left w-full"
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ duration: 0.3, delay: 0.1 * index }}
                     whileHover={{ x: 10 }}
                   >
                     {item}
-                  </motion.a>
+                  </motion.button>
                 ))}
               </motion.nav>
             </div>

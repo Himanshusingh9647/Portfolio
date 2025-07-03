@@ -100,13 +100,13 @@ const Projects = () => {
         </motion.div>
         
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 max-w-5xl mx-auto"
           variants={containerVariants}
         >
           {filteredProjects.map((project, index) => (
             <motion.div 
               key={project.id}
-              className="relative"
+              className="relative mx-auto max-w-md lg:max-w-none"
               variants={itemVariants}
               initial="hidden"
               animate="visible"
@@ -114,7 +114,7 @@ const Projects = () => {
               layout
             >
               <motion.div 
-                className="absolute -top-4 -left-4 w-full h-full border-2 border-black dark:border-white opacity-30"
+                className="absolute -top-2 -left-2 sm:-top-4 sm:-left-4 w-full h-full border-2 border-black dark:border-white opacity-30"
                 initial={{ scale: 0, rotate: -5 }}
                 whileInView={{ scale: 1, rotate: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -125,11 +125,11 @@ const Projects = () => {
                 whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
-                <div className="relative overflow-hidden h-64">
+                <div className="relative overflow-hidden h-48 sm:h-56 md:h-64">
                   <motion.img 
                     src={project.image} 
                     alt={project.title} 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-center"
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.3 }}
                   />
@@ -138,10 +138,10 @@ const Projects = () => {
                     whileHover={{ opacity: 0.9 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="flex space-x-4">
+                    <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                       <motion.button 
                         onClick={project.demoLink === 'video' ? () => setVideoModalOpen(true) : () => window.open(project.demoLink, '_blank')}
-                        className="bg-white dark:bg-black text-black dark:text-white px-6 py-3 border-2 border-black dark:border-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition duration-300"
+                        className="bg-white dark:bg-black text-black dark:text-white px-4 sm:px-6 py-2 sm:py-3 border-2 border-black dark:border-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition duration-300 text-sm sm:text-base"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
@@ -151,7 +151,7 @@ const Projects = () => {
                         href={project.codeLink} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="bg-white dark:bg-black text-black dark:text-white px-6 py-3 border-2 border-black dark:border-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition duration-300"
+                        className="bg-white dark:bg-black text-black dark:text-white px-4 sm:px-6 py-2 sm:py-3 border-2 border-black dark:border-white font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition duration-300 text-sm sm:text-base text-center"
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                       >
@@ -161,9 +161,9 @@ const Projects = () => {
                   </motion.div>
                 </div>
                 
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-black dark:text-white mb-2">{project.title}</h3>
-                  <p className="text-gray-700 dark:text-gray-300 mb-4 font-light leading-relaxed">{project.description}</p>
+                <div className="p-4 sm:p-6">
+                  <h3 className="text-xl sm:text-2xl font-bold text-black dark:text-white mb-2">{project.title}</h3>
+                  <p className="text-gray-700 dark:text-gray-300 mb-4 font-light leading-relaxed text-sm sm:text-base">{project.description}</p>
                   <motion.div 
                     className="flex flex-wrap gap-2 mb-4"
                     initial={{ opacity: 0 }}
@@ -173,7 +173,7 @@ const Projects = () => {
                     {project.technologies.map((tech, techIndex) => (
                       <motion.span 
                         key={techIndex}
-                        className="px-3 py-1 bg-transparent border-2 border-black dark:border-white text-black dark:text-white text-sm font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
+                        className="px-2 sm:px-3 py-1 bg-transparent border-2 border-black dark:border-white text-black dark:text-white text-xs sm:text-sm font-medium hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black transition-all duration-300"
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ duration: 0.3, delay: 0.1 * techIndex }}

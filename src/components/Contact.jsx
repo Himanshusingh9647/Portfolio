@@ -1,5 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import emailjs from '@emailjs/browser';
+import { emailjsConfig, createEmailTemplate } from '../config/emailjs';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,7 +14,55 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  
+  const [terminalLines, setTerminalLines] = useState([]);
+  const [currentCommand, setCurrentCommand] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+
+  // Terminal animation text
+  const commands = [
+    'git clone https://github.com/himanshusingh9647/contact.git',
+    'cd contact && npm install',
+    'npm start -- --message="Let\'s collaborate!"',
+    '> Server running on localhost:3000',
+    '> Ready to receive your message...'
+  ];
+
+  useEffect(() => {
+    if (currentCommand < commands.length) {
+      const command = commands[currentCommand];
+      setIsTyping(true);
+      let displayText = '';
+      let index = 0;
+      
+      const timer = setInterval(() => {
+        if (index < command.length) {
+          displayText += command[index];
+          setTerminalLines(prev => {
+            const newLines = [...prev];
+            newLines[currentCommand] = displayText;
+            return newLines;
+          });
+          index++;
+        } else {
+          clearInterval(timer);
+          setIsTyping(false);
+          setTimeout(() => {
+            setCurrentCommand(prev => prev + 1);
+          }, 800);
+        }
+      }, 75);
+      
+      return () => clearInterval(timer);
+    }
+  }, [currentCommand]);
+
+  // Reset terminal animation
+  const resetTerminal = () => {
+    setTerminalLines([]);
+    setCurrentCommand(0);
+    setIsTyping(false);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -20,14 +70,26 @@ const Contact = () => {
       [name]: value
     });
   };
-  
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitError('');
-    
-    // Simulate form submission
-    setTimeout(() => {
+
+    try {
+      // Create email template parameters
+      const templateParams = createEmailTemplate(formData);
+
+      // Send email using EmailJS
+      const result = await emailjs.send(
+        emailjsConfig.serviceID,
+        emailjsConfig.templateID,
+        templateParams,
+        emailjsConfig.publicKey
+      );
+
+      console.log('Email sent successfully:', result);
+      
       setIsSubmitting(false);
       setSubmitSuccess(true);
       setFormData({
@@ -36,323 +98,449 @@ const Contact = () => {
         subject: '',
         message: ''
       });
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => {
         setSubmitSuccess(false);
       }, 5000);
-    }, 1500);
-    
-    // In a real application, you would handle the form submission here
-    // Example:
-    /*
-    fetch('/api/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    })
-      .then(response => response.json())
-      .then(data => {
-        setIsSubmitting(false);
-        if (data.success) {
-          setSubmitSuccess(true);
-          setFormData({
-            name: '',
-            email: '',
-            subject: '',
-            message: ''
-          });
-        } else {
-          setSubmitError(data.error || 'Something went wrong. Please try again.');
-        }
-      })
-      .catch(error => {
-        setIsSubmitting(false);
-        setSubmitError('An error occurred. Please try again later.');
-        console.error('Error:', error);
-      });
-    */
-  };  return (
+
+    } catch (error) {
+      console.error('Failed to send email:', error);
+      setIsSubmitting(false);
+      setSubmitError('Failed to send message. Please try again or contact me directly at himanshusingh1088@gmail.com');
+    }
+  };
+
+  return (
     <motion.section 
       id="contact" 
-      className="relative min-h-screen flex items-center bg-white dark:bg-black py-20"
+      className="relative min-h-screen flex items-center bg-gray-50 dark:bg-gray-950 py-20"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* Minimal geometric background */}
-      <div className="absolute inset-0 z-0">
+      {/* Code-inspired background elements */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.div 
-          className="absolute right-10 top-20 w-32 h-32 border border-black dark:border-white opacity-20"
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
+          className="absolute top-20 left-10 text-6xl text-gray-200 dark:text-gray-800 font-mono opacity-30"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 0.3, y: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
-        ></motion.div>
+        >
+          {'{ }'}
+        </motion.div>
         <motion.div 
-          className="absolute left-10 bottom-20 w-24 h-24 bg-black dark:bg-white opacity-10"
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.7 }}
-        ></motion.div>
+          className="absolute bottom-20 right-10 text-4xl text-gray-200 dark:text-gray-800 font-mono opacity-30"
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 0.3, scale: 1 }}
+          transition={{ duration: 1, delay: 0.7 }}
+        >
+          &lt;/&gt;
+        </motion.div>
         <motion.div 
-          className="absolute right-1/4 bottom-1/3 w-2 h-20 bg-black dark:bg-white opacity-30"
-          initial={{ height: 0 }}
-          animate={{ height: 80 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-        ></motion.div>
-        <motion.div 
-          className="absolute left-1/3 top-1/4 w-20 h-2 bg-black dark:bg-white opacity-30"
+          className="absolute top-1/3 right-1/4 w-32 h-0.5 bg-gray-300 dark:bg-gray-700 opacity-40"
           initial={{ width: 0 }}
-          animate={{ width: 80 }}
-          transition={{ duration: 0.6, delay: 1.1 }}
-        ></motion.div>
+          animate={{ width: 128 }}
+          transition={{ duration: 0.8, delay: 0.9 }}
+        />
+        <motion.div 
+          className="absolute bottom-1/3 left-1/4 w-0.5 h-24 bg-gray-300 dark:bg-gray-700 opacity-40"
+          initial={{ height: 0 }}
+          animate={{ height: 96 }}
+          transition={{ duration: 0.8, delay: 1.1 }}
+        />
       </div>
-      <div className="container mx-auto px-4 z-10">        <motion.div 
+
+      <div className="container mx-auto px-4 z-10">
+        {/* Header with terminal style */}
+        <motion.div 
           className="text-center mb-16"
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
+          <motion.div
+            className="inline-block bg-black dark:bg-white text-green-400 dark:text-green-600 px-4 py-2 rounded-t-lg font-mono text-sm mb-4"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            ~/contact $ init_connection()
+          </motion.div>
           <motion.h2 
-            className="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6 leading-tight tracking-normal"
+            className="text-4xl md:text-5xl font-bold text-black dark:text-white mb-6 font-mono"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-          >Get In Touch</motion.h2>
-          <div className="w-16 h-0.5 bg-black dark:bg-white mx-auto mb-8"></div>
+          >
+            function <span className="text-blue-600 dark:text-blue-400">getInTouch</span>() {'{'}
+          </motion.h2>
           <motion.p
-            className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-light"
+            className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed font-mono"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.6 }}
           >
-            Have a question or want to work together? Fill out the form below and I'll get back to you as soon as possible.
+            <span className="text-gray-500 dark:text-gray-500">// Let's collaborate and build something amazing together!</span><br/>
+            <span className="text-purple-600 dark:text-purple-400">return</span> <span className="text-green-600 dark:text-green-400">"Ready to connect 🚀"</span>;
           </motion.p>
-        </motion.div>
-          <div className="flex flex-col md:flex-row gap-10 max-w-5xl mx-auto">
-          {/* Contact Form */}          <motion.div 
-            className="w-full md:w-3/5 lg:w-3/5"
+          <motion.div
+            className="text-4xl md:text-5xl font-bold text-black dark:text-white mt-4 font-mono"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+          >
+            {'}'}
+          </motion.div>
+        </motion.div>
+
+        <div className="flex flex-col lg:flex-row gap-12 max-w-6xl mx-auto">
+          {/* Terminal-style Contact Info */}
+          <motion.div 
+            className="w-full lg:w-2/5"
+            initial={{ x: -50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <div className="relative">
-              <motion.div 
-                className="absolute -top-4 -left-4 w-full h-full border-2 border-black dark:border-white opacity-30"
-                initial={{ scale: 0, rotate: -5 }}
-                whileInView={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: true }}
-              ></motion.div>
-              <motion.form 
-                onSubmit={handleSubmit} 
-                className="relative bg-white dark:bg-black border-2 border-black dark:border-white p-8"
-                whileHover={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >              {submitSuccess && (
-                <motion.div 
-                  className="mb-8 p-4 border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black flex items-center"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            <div className="bg-gray-900 dark:bg-gray-800 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+              {/* Terminal header */}
+              <div className="bg-gray-200 dark:bg-gray-700 px-4 py-2 flex items-center">
+                <div className="flex space-x-2">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                </div>
+                <div className="ml-4 text-gray-600 dark:text-gray-300 font-mono text-sm">
+                  contact-terminal.sh
+                </div>
+                <button 
+                  onClick={resetTerminal}
+                  className="ml-auto text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                  title="Reset animation"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Thank you! Your message has been sent successfully.</span>
-                </motion.div>
-              )}
+                  ↻
+                </button>
+              </div>
               
-              {submitError && (
+              {/* Terminal content */}
+              <div className="p-6 font-mono text-sm text-green-400 dark:text-green-300 min-h-[300px]">
+                <div className="mb-4">
+                  <span className="text-blue-400">himanshu@portfolio</span>
+                  <span className="text-white">:</span>
+                  <span className="text-yellow-400">~/contact</span>
+                  <span className="text-white">$ </span>
+                </div>
+                
                 <motion.div 
-                  className="mb-8 p-4 border-2 border-black dark:border-white bg-black dark:bg-white text-white dark:text-black flex items-center"
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="space-y-1"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 1 }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{submitError}</span>
+                  {terminalLines.map((line, index) => (
+                    <div key={index} className="font-mono text-sm">
+                      {line}
+                    </div>
+                  ))}
+                  {isTyping && <span className="animate-pulse text-green-400">|</span>}
                 </motion.div>
-              )}
-                <motion.div 
-                className="mb-6"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-              >
-                <label htmlFor="name" className="block text-sm font-medium text-black dark:text-white mb-2">
-                  Your Name
-                </label>
-                <motion.input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-black dark:border-white bg-transparent text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                  placeholder="Name"
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              </motion.div>
-              
-              <motion.div 
-                className="mb-6"
-                initial={{ y: 30, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}                transition={{ duration: 0.5, delay: 1.0 }}
-              >
-                <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white mb-2">
-                  Email Address
-                </label>
-                <motion.input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-black dark:border-white bg-transparent text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                  placeholder="abc@gmail.com"
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              </motion.div>
-              
-              <motion.div 
-                className="mb-6"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.1 }}
-              >
-                <label htmlFor="subject" className="block text-sm font-medium text-black dark:text-white mb-2">
-                  Subject
-                </label>
-                <motion.input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border-2 border-black dark:border-white bg-transparent text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                  placeholder="Project Inquiry"
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                />
-              </motion.div>
-                <motion.div 
-                className="mb-6"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.2 }}
-              >
-                <label htmlFor="message" className="block text-sm font-medium text-black dark:text-white mb-2">
-                  Message
-                </label>
-                <motion.textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows="5"
-                  className="w-full px-4 py-3 border-2 border-black dark:border-white bg-transparent text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
-                  placeholder="Your message here..."
-                  whileFocus={{ scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                ></motion.textarea>
-              </motion.div>
-                <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full px-8 py-4 bg-black text-white border-2 border-black hover:bg-white hover:text-black dark:bg-white dark:text-black dark:border-white dark:hover:bg-black dark:hover:text-white transition-all duration-300 font-medium"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.3 }}
-              >
-                {isSubmitting ? 'Sending...' : 'Send Message'}
-              </motion.button>
-            </motion.form>
+
+                <div className="mt-8 space-y-4 text-white">
+                  <motion.div 
+                    className="flex items-center space-x-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.5 }}
+                  >
+                    <span className="text-cyan-400">const</span>
+                    <span className="text-yellow-400">email</span>
+                    <span className="text-white">=</span>
+                    <span className="text-green-400">"himanshusingh1088@gmail.com"</span>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="flex items-center space-x-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.7 }}
+                  >
+                    <span className="text-cyan-400">const</span>
+                    <span className="text-yellow-400">phone</span>
+                    <span className="text-white">=</span>
+                    <span className="text-green-400">"+91 9647431656"</span>
+                  </motion.div>
+                  
+                  <motion.div 
+                    className="flex items-center space-x-3"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 1.9 }}
+                  >
+                    <span className="text-cyan-400">const</span>
+                    <span className="text-yellow-400">location</span>
+                    <span className="text-white">=</span>
+                    <span className="text-green-400">"Jaipur, Rajasthan"</span>
+                  </motion.div>
+
+                  <motion.div 
+                    className="mt-6 p-3 bg-gray-800 dark:bg-gray-700 rounded border-l-4 border-blue-400"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 2.1 }}
+                  >
+                    <div className="text-blue-400 text-xs mb-1">// Social Networks</div>
+                    <div className="space-y-1">
+                      <div>
+                        <a 
+                          href="https://github.com/himanshusingh9647" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-purple-400 hover:text-purple-300 transition-colors"
+                        >
+                          github.com/himanshusingh9647
+                        </a>
+                      </div>
+                      <div>
+                        <a 
+                          href="https://linkedin.com/in/himanshusingh9647" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-purple-400 hover:text-purple-300 transition-colors"
+                        >
+                          linkedin.com/in/himanshusingh9647
+                        </a>
+                      </div>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
             </div>
           </motion.div>
-            {/* Contact Info */}          <motion.div 
-            className="w-full md:w-2/5 lg:w-2/5"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
+
+          {/* Developer-style Contact Form */}
+          <motion.div 
+            className="w-full lg:w-3/5"
+            initial={{ x: 50, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.0 }}
           >
-            <div className="relative">
-              <motion.div 
-                className="absolute -top-4 -left-4 w-full h-full border-2 border-black dark:border-white opacity-30"
-                initial={{ scale: 0, rotate: -5 }}
-                whileInView={{ scale: 1, rotate: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                viewport={{ once: true }}
-              ></motion.div>
-              <motion.div 
-                className="relative border-2 border-black dark:border-white bg-white dark:bg-black p-8 h-full"
-                whileHover={{ scale: 1.01 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              >              <motion.h3 
-                className="text-2xl font-bold text-black dark:text-white mb-4"
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.9 }}
-              >Contact Information</motion.h3>
-              <div className="w-12 h-0.5 bg-black dark:bg-white mb-8"></div>
-              
-              <div className="space-y-8">
-                {[
-                  {
-                    icon: "M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z",
-                    title: "Phone",
-                    content: "+91 9647431656"
-                  },
-                  {
-                    icon: "M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z",
-                    title: "Email",
-                    content: "himanshusingh1088@gmail.com"
-                  },
-                  {
-                    icon: "M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z",
-                    title: "Location",
-                    content: "Jaipur, Rajasthan, India"
-                  }
-                ].map((item, index) => (                  <motion.div 
-                    key={index}
-                    className="flex items-center group"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 1.0 + (0.1 * index) }}
-                    whileHover={{ x: 5 }}
-                  ><motion.div 
-                      className="w-12 h-12 border-2 border-black dark:border-white flex items-center justify-center mr-4 group-hover:bg-black group-hover:border-black dark:group-hover:bg-white dark:group-hover:border-white transition-all duration-300"
-                      whileHover={{ scale: 1.1 }}
+            <div className="bg-white dark:bg-gray-900 rounded-lg border-2 border-gray-300 dark:border-gray-600 overflow-hidden">
+              {/* VS Code style header */}
+              <div className="bg-gray-100 dark:bg-gray-800 px-4 py-3 border-b border-gray-300 dark:border-gray-600">
+                <div className="flex items-center space-x-4">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  </div>
+                  <div className="text-gray-600 dark:text-gray-300 font-mono text-sm">
+                    contact-form.js
+                  </div>
+                  <div className="ml-auto flex space-x-1">
+                    <div className="w-4 h-4 bg-blue-500 rounded-sm"></div>
+                    <div className="w-4 h-4 bg-orange-500 rounded-sm"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Code comment header */}
+                <motion.div 
+                  className="font-mono text-sm text-gray-500 dark:text-gray-400 mb-6"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 1.2 }}
+                >
+                  <div>/**</div>
+                  <div> * Send me a message and let's start building!</div>
+                  <div> * @param {'{'}Object{'}'} messageData - Your contact information</div>
+                  <div> * @returns {'{'}Promise{'}'} - A new collaboration opportunity</div>
+                  <div> */</div>
+                </motion.div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.4 }}
+                  >
+                    <label className="block font-mono text-sm mb-2">
+                      <span className="text-purple-600 dark:text-purple-400">const</span>
+                      <span className="text-gray-700 dark:text-gray-300 ml-2">senderName</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">=</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder='"Your Name"'
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded font-mono text-green-600 dark:text-green-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.6 }}
+                  >
+                    <label className="block font-mono text-sm mb-2">
+                      <span className="text-purple-600 dark:text-purple-400">const</span>
+                      <span className="text-gray-700 dark:text-gray-300 ml-2">emailAddress</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">=</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      placeholder='"your.email@domain.com"'
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded font-mono text-green-600 dark:text-green-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 1.8 }}
+                  >
+                    <label className="block font-mono text-sm mb-2">
+                      <span className="text-purple-600 dark:text-purple-400">const</span>
+                      <span className="text-gray-700 dark:text-gray-300 ml-2">subject</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">=</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="subject"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleChange}
+                      required
+                      placeholder='"Project Collaboration"'
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded font-mono text-green-600 dark:text-green-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 2.0 }}
+                  >
+                    <label className="block font-mono text-sm mb-2">
+                      <span className="text-purple-600 dark:text-purple-400">const</span>
+                      <span className="text-gray-700 dark:text-gray-300 ml-2">message</span>
+                      <span className="text-gray-500 dark:text-gray-400 ml-2">=</span>
+                    </label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      required
+                      rows="6"
+                      placeholder={`\`Hello Himanshu,
+
+I'd love to discuss a potential collaboration...
+
+Looking forward to hearing from you!\``}
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded font-mono text-green-600 dark:text-green-400 focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none transition-colors resize-none"
+                    />
+                  </motion.div>
+
+                  {/* Function call style submit */}
+                  <motion.div
+                    className="font-mono text-sm"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 2.2 }}
+                  >
+                    <div className="text-gray-500 dark:text-gray-400 mb-4">
+                      // Execute the contact function
+                    </div>
+                    
+                    <motion.button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-mono py-4 px-6 rounded-lg transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {isSubmitting ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          sendMessage()...
+                        </span>
+                      ) : (
+                        'sendMessage() {}'
+                      )}
+                    </motion.button>
+                  </motion.div>
+
+                  {/* Success/Error Messages */}
+                  {submitSuccess && (
+                    <motion.div
+                      className="p-4 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700 rounded font-mono text-sm"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-black dark:text-white group-hover:text-white dark:group-hover:text-black transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                      </svg>
+                      <div className="text-green-700 dark:text-green-300">
+                        <span className="text-green-600 dark:text-green-400">✅ Success!</span>
+                        <div className="mt-1">console.log("Message sent successfully! 🚀")</div>
+                      </div>
                     </motion.div>
-                    <div>
-                      <h4 className="text-lg font-medium text-black dark:text-white">{item.title}</h4>
-                      <p className="text-gray-700 dark:text-gray-300 font-light">{item.content}</p>
-                    </div>
-                  </motion.div>                ))}              </div>
-              </motion.div>
+                  )}
+
+                  {submitError && (
+                    <motion.div
+                      className="p-4 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700 rounded font-mono text-sm"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="text-red-700 dark:text-red-300">
+                        <span className="text-red-600 dark:text-red-400">❌ Error:</span>
+                        <div className="mt-1">console.error("{submitError}")</div>
+                      </div>
+                    </motion.div>
+                  )}
+                </form>
+              </div>
             </div>
           </motion.div>
         </div>
+
+        {/* Fun developer quote */}
+        <motion.div
+          className="text-center mt-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 2.5 }}
+        >
+          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 max-w-2xl mx-auto border-l-4 border-blue-500">
+            <div className="font-mono text-gray-600 dark:text-gray-400 mb-2">
+              // Fun fact
+            </div>
+            <div className="text-lg text-gray-700 dark:text-gray-300 font-mono">
+              <span className="text-purple-600 dark:text-purple-400">while</span>
+              <span className="text-gray-700 dark:text-gray-300"> (</span>
+              <span className="text-yellow-600 dark:text-yellow-400">coffee</span>
+              <span className="text-gray-700 dark:text-gray-300">) {'{'} </span>
+              <span className="text-green-600 dark:text-green-400">code()</span>
+              <span className="text-gray-700 dark:text-gray-300">; {'}'}</span>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2 font-mono">
+              // Let's build something amazing together! ☕️ + 👨‍💻 = 🚀
+            </div>
+          </div>
+        </motion.div>
       </div>
     </motion.section>
   );

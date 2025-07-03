@@ -10,15 +10,21 @@ import Contact from './components/Contact'
 import Footer from './components/Footer'
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check if user has a saved preference
+    const saved = localStorage.getItem('darkMode');
+    if (saved !== null) {
+      return JSON.parse(saved);
+    }
+    // Fall back to system preference
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   
   useEffect(() => {
-    // Check if user prefers dark mode
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-    }
+    // Save user preference to localStorage
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
     
-    // Add dark mode class to body
+    // Add dark mode class to document
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {

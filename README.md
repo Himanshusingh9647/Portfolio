@@ -76,7 +76,8 @@ If you want to deploy this to your own GitHub Pages:
 ```
 portfolio/
 ├── public/
-│   └── vite.svg
+│   ├── rocket-svgrepo-com.svg
+│   └── .nojekyll
 ├── src/
 │   ├── components/
 │   │   ├── About.jsx
